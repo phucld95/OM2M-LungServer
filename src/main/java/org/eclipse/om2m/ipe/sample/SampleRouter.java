@@ -37,10 +37,13 @@ public class SampleRouter implements InterworkingService{
 
 	@Override
 	public ResponsePrimitive doExecute(RequestPrimitive request) {
+		// Request execute
 		ResponsePrimitive response = new ResponsePrimitive(request);
+		// Parse body json
 		if(request.getQueryStrings().containsKey("op")){
 			String operation = request.getQueryStrings().get("op").get(0);
 			Operations op = Operations.getOperationFromString(operation);
+			// Get id cua den muon tuong tac
 			String lampid= null;
 			if(request.getQueryStrings().containsKey("lampid")){
 				lampid = request.getQueryStrings().get("lampid").get(0);
@@ -49,6 +52,8 @@ public class SampleRouter implements InterworkingService{
 			switch(op){
 			case SET_ON:
 				SampleController.setLampState(lampid, true);
+				response.setContent(this.sampleResponse());
+				request.setReturnContentType(MimeMediaType.OBIX);
 				response.setResponseStatusCode(ResponseStatusCode.OK);
 				break;
 			case SET_OFF:
@@ -76,6 +81,8 @@ public class SampleRouter implements InterworkingService{
 				throw new BadRequestException();
 			case GET_STATE_DIRECT:
 				String content = SampleController.getFormatedLampState(lampid);
+				LOGGER.info("Response content: " + content);
+				System.out.println(content);
 				response.setContent(content);
 				request.setReturnContentType(MimeMediaType.OBIX);
 				response.setResponseStatusCode(ResponseStatusCode.OK);
@@ -88,6 +95,32 @@ public class SampleRouter implements InterworkingService{
 			response.setResponseStatusCode(ResponseStatusCode.BAD_REQUEST);
 		}
 		return response;
+	}
+	
+	
+	public String sampleResponse() {
+		String content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
+				"<m2m:cin xmlns:m2m=\"http://www.onem2m.org/xml/protocols\" xmlns:hd=\"http://www.onem2m.org/xml/protocols/homedomain\" rn=\"cin_17913587\">\n" + 
+				"   <ty>4</ty>\n" + 
+				"   <ri>/mn-cse/cin-17913587</ri>\n" + 
+				"   <pi>/mn-cse/cnt-527275723</pi>\n" + 
+				"   <ct>20180422T235050</ct>\n" + 
+				"   <lt>20180422T235050</lt>\n" + 
+				"   <st>0</st>\n" + 
+				"   <cnf>application/obix:0</cnf>\n" + 
+				"   <cs>216</cs>\n" + 
+				"   <con>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?>\n" + 
+				"&lt;obj>\n" + 
+				"    &lt;str val=&quot;LAMP&quot; name=&quot;type&quot;/>\n" + 
+				"    &lt;str val=&quot;Home&quot; name=&quot;location&quot;/>\n" + 
+				"    &lt;str val=&quot;LAMP_0&quot; name=&quot;lampId&quot;/>\n" + 
+				"    &lt;bool val=&quot;false&quot; name=&quot;state&quot;/>\n" + 
+				"&lt;/obj>\n" + 
+				"</con>\n" + 
+				"</m2m:cin>\n" + 
+				"";
+		
+		return content;
 	}
 
 	@Override

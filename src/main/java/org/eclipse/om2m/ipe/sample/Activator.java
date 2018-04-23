@@ -40,7 +40,12 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext bundleContext) throws Exception {
-        logger.info("Register IpeService..");
+    	logger.info("Open database..");
+
+    	DatabaseHandle dbHandle = new DatabaseHandle();
+    	dbHandle.createMongoClient();
+    	
+    	logger.info("Register IpeService..");
         bundleContext.registerService(InterworkingService.class.getName(), new SampleRouter(), null);
         logger.info("IpeService is registered.");
 
