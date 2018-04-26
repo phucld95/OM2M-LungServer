@@ -25,6 +25,8 @@ public class SampleConstants {
 	
 	private SampleConstants(){}
 	
+	public static final String FFT_BASE_URL = "";
+	public static final String POLI_BASE_URL = "";
 	public static final String POA = "sample";
 	public static final String DATA = "DATA";
 	public static final String DESC = "DESCRIPTOR";

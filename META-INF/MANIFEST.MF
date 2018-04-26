@@ -6,10 +6,13 @@ Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: org.eclipse.om2m.ipe.sample.Activator
 Require-Bundle: org.eclipse.om2m.commons
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ClassPath: .,
+ libs/gson-2.7.jar
 Import-Package: com.mongodb,
  com.mongodb.client,
  org.apache.commons.logging,
  org.eclipse.om2m.core.service,
  org.eclipse.om2m.interworking.service,
+ org.eclipse.recommenders.utils.gson,
  org.osgi.framework,
  org.osgi.util.tracker

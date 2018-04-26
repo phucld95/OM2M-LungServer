@@ -31,6 +31,12 @@ import org.eclipse.om2m.ipe.sample.constants.Operations;
 import org.eclipse.om2m.ipe.sample.constants.SampleConstants;
 import org.eclipse.om2m.ipe.sample.controller.SampleController;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
+ 
+
 public class SampleRouter implements InterworkingService{
 
 	private static Log LOGGER = LogFactory.getLog(SampleRouter.class);
@@ -39,16 +45,32 @@ public class SampleRouter implements InterworkingService{
 	public ResponsePrimitive doExecute(RequestPrimitive request) {
 		// Request execute
 		ResponsePrimitive response = new ResponsePrimitive(request);
-		// Parse body json
+		System.out.print("Da nhan dc request----------------------");
+		String json = (String) request.getContent();
+		
+		
+		
+		Gson gson = new Gson();
+		JsonElement params = gson.fromJson(json, JsonElement.class);
+		String option = params.getAsJsonObject().get("op").getAsString();
+		
+		
+		System.out.print(json);
+		System.out.print("option: " + option);		
+		System.out.print("---------------------------------------");
+		
+		
 		if(request.getQueryStrings().containsKey("op")){
 			String operation = request.getQueryStrings().get("op").get(0);
 			Operations op = Operations.getOperationFromString(operation);
-			// Get id cua den muon tuong tac
 			String lampid= null;
 			if(request.getQueryStrings().containsKey("lampid")){
 				lampid = request.getQueryStrings().get("lampid").get(0);
 			}
-			LOGGER.info("Received request in Sample IPE: op=" + operation + " ; lampid=" + lampid);
+			LOGGER.info("Received request in Sample IPE: op=" + operation);
+			
+			
+			
 			switch(op){
 			case SET_ON:
 				SampleController.setLampState(lampid, true);
@@ -56,8 +78,14 @@ public class SampleRouter implements InterworkingService{
 				request.setReturnContentType(MimeMediaType.OBIX);
 				response.setResponseStatusCode(ResponseStatusCode.OK);
 				break;
-			case SET_OFF:
-				SampleController.setLampState(lampid, false);
+			case CREATE_USER:
+				String name = request.getQueryStrings().get("name").get(0);
+				String age = request.getQueryStrings().get("age").get(0);
+				String dayOfBirth = request.getQueryStrings().get("dayOfBirth").get(0);
+				String weight = "";
+				String heght = "";
+				String location = "";
+				String smokingStatus = "";
 				response.setResponseStatusCode(ResponseStatusCode.OK);
 				break;
 			case TOGGLE:

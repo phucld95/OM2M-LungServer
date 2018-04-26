@@ -58,12 +58,17 @@ public class LifeCycleManager {
 			String lampId = Lamp.TYPE+"_"+i;
 			createLampResources(lampId, false, SampleConstants.POA);
 		}
+		
+//		My code
+		createResources("SPIRO_SMART", false, SampleConstants.POA);
+		
+		
 		createLampAll(SampleConstants.POA);			
 
 		// Start the GUI
-		if(SampleConstants.GUI){
-			GUI.init();
-		}
+//		if(SampleConstants.GUI){
+//			GUI.init();
+//		}
 
 	}
 
@@ -71,9 +76,11 @@ public class LifeCycleManager {
 	 * Stop the GUI if it is present
 	 */
 	public static void stop(){
-		if(SampleConstants.GUI){
-			GUI.stop();
-		}
+//		if(SampleConstants.GUI){
+//			GUI.stop();
+//		}
+		
+//		Close database in here TO_DO
 	}
 
 	/**
@@ -124,6 +131,55 @@ public class LifeCycleManager {
 		}
 	}
 
+	
+	/**
+	 * Creates all required resources.
+	 * @param appId - Application ID
+	 * @param initValue - initial lamp value
+	 * @param poa - lamp Point of Access
+	 */
+	private static void createResources(String appId, boolean initValue, String poa) {
+		// Create the Application resource
+		Container container = new Container();
+		container.getLabels().add("lungfuction");
+		container.setMaxNrOfInstances(BigInteger.valueOf(0));
+		
+
+		AE ae = new AE();
+		ae.setRequestReachability(true);
+		ae.getPointOfAccess().add(poa);
+		ae.setAppID(appId);
+		ae.setName(appId);
+
+		ResponsePrimitive response = RequestSender.createAE(ae);
+		// Create Application sub-resources only if application not yet created
+		if(response.getResponseStatusCode().equals(ResponseStatusCode.CREATED)) {
+			container = new Container();
+			container.setMaxNrOfInstances(BigInteger.valueOf(10));
+			// Create DESCRIPTOR container sub-resource
+			container.setName(SampleConstants.DESC);
+			LOGGER.info(RequestSender.createContainer(response.getLocation(), container));
+			// Create STATE container sub-resource
+			container.setName(SampleConstants.DATA);
+			LOGGER.info(RequestSender.createContainer(response.getLocation(), container));
+
+			String content;
+			// Create DESCRIPTION contentInstance on the DESCRIPTOR container resource
+			content = ObixUtil.getDescriptorRep(SampleConstants.CSE_ID, appId, SampleConstants.DATA);
+			ContentInstance contentInstance = new ContentInstance();
+			contentInstance.setContent(content);
+			contentInstance.setContentInfo(MimeMediaType.OBIX);
+			RequestSender.createContentInstance(
+					SampleConstants.CSE_PREFIX + "/" + appId + "/" + SampleConstants.DESC, contentInstance);
+
+			// Create initial contentInstance on the STATE container resource
+			content = ObixUtil.getStateRep(appId, initValue);
+			contentInstance.setContent(content);
+			RequestSender.createContentInstance(
+					SampleConstants.CSE_PREFIX + "/" + appId + "/" + SampleConstants.DATA, contentInstance);
+		}
+	}
+	
 	/**
 	 * Create the LAMP_ALL container
 	 * @param poa

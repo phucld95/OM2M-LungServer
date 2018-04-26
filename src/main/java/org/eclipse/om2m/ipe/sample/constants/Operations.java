@@ -33,7 +33,13 @@ public enum Operations {
 	TOGGLE("toggle"),
 	ALL_ON("allOn"),
 	ALL_OFF("allOff"),
-	ALL_TOGGLE("allToggle");
+	ALL_TOGGLE("allToggle"),
+	CREATE_RECORD("createRecord"),
+	GET_TIMELINE("getTimeline"),
+	CREATE_USER("createUser");
+	
+	
+	
 	private final String value;
 	
 	private Operations(final String value){
