@@ -32,9 +32,8 @@ import org.eclipse.om2m.ipe.sample.constants.SampleConstants;
 import org.eclipse.om2m.ipe.sample.controller.SampleController;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
  
 
 public class SampleRouter implements InterworkingService{
@@ -45,79 +44,59 @@ public class SampleRouter implements InterworkingService{
 	public ResponsePrimitive doExecute(RequestPrimitive request) {
 		// Request execute
 		ResponsePrimitive response = new ResponsePrimitive(request);
-		System.out.print("Da nhan dc request----------------------");
+		System.out.print("---------------------------------------");
 		String json = (String) request.getContent();
-		
-		
-		
+		System.out.print(json);
 		Gson gson = new Gson();
 		JsonElement params = gson.fromJson(json, JsonElement.class);
-		String option = params.getAsJsonObject().get("op").getAsString();
-		
-		
-		System.out.print(json);
-		System.out.print("option: " + option);		
+		String option = params.getAsJsonObject().get("op").getAsString();	
 		System.out.print("---------------------------------------");
 		
+		Operations op = Operations.getOperationFromString(option);
+		LOGGER.info("Received request in Sample IPE: op=" + option);
 		
-		if(request.getQueryStrings().containsKey("op")){
-			String operation = request.getQueryStrings().get("op").get(0);
-			Operations op = Operations.getOperationFromString(operation);
-			String lampid= null;
-			if(request.getQueryStrings().containsKey("lampid")){
-				lampid = request.getQueryStrings().get("lampid").get(0);
-			}
-			LOGGER.info("Received request in Sample IPE: op=" + operation);
+		System.out.print(op);
+
+		switch(op){
+		case CREATE_USER:
+			long userId = DatabaseHandle.getInstance().saveUser(params);
+			response.setContent("{\"user_id\" : " + String.valueOf(userId) + " }");
+			response.setResponseStatusCode(ResponseStatusCode.OK);
+			break;
+		
+		case CREATE_RECORD:
+			String user = params.getAsJsonObject().get("user_id").getAsString();;
+			String record = params.getAsJsonObject().get("record").getAsString();			
 			
+			//Send request to FFT server and handle response.
+			String contentString = RequestSender.getFFT(record);
+			JsonElement contentJson = gson.fromJson(contentString, JsonElement.class);
+			String engCurve = contentJson.getAsJsonObject().get("eng_curve").getAsJsonArray().toString();
+			String frmTimes = contentJson.getAsJsonObject().get("frm_times").getAsJsonArray().toString();			
 			
+			//Send request to lean server and handle response.
+			String poliServerResponseString = RequestSender.postToPoliLearnServer(contentString);
+			JsonElement poliServerResponseJson = gson.fromJson(poliServerResponseString, JsonElement.class);
+			String PEF = poliServerResponseJson.getAsJsonObject().get("PEF").getAsString();			
+			String FEF = poliServerResponseJson.getAsJsonObject().get("FEF").getAsString();			
+			String FVC = poliServerResponseJson.getAsJsonObject().get("FVC").getAsString();			
+			String FEV1 = poliServerResponseJson.getAsJsonObject().get("FEV1").getAsString();			
+
+			//Save recored to db
+			long recordId = DatabaseHandle.getInstance().saveRecord(user, record, engCurve, frmTimes, PEF, FEF, FVC, FEV1);
+
+			//Create response.
+			response.setContent(this.customResponse(engCurve, frmTimes, PEF, FEF, FVC, FEV1));
+			response.setResponseStatusCode(ResponseStatusCode.OK);
+			break;
+				
+		case GET_TIMELINE:
+			LOGGER.info("Response content: " + "");
+			response.setResponseStatusCode(ResponseStatusCode.OK);
+			break;
 			
-			switch(op){
-			case SET_ON:
-				SampleController.setLampState(lampid, true);
-				response.setContent(this.sampleResponse());
-				request.setReturnContentType(MimeMediaType.OBIX);
-				response.setResponseStatusCode(ResponseStatusCode.OK);
-				break;
-			case CREATE_USER:
-				String name = request.getQueryStrings().get("name").get(0);
-				String age = request.getQueryStrings().get("age").get(0);
-				String dayOfBirth = request.getQueryStrings().get("dayOfBirth").get(0);
-				String weight = "";
-				String heght = "";
-				String location = "";
-				String smokingStatus = "";
-				response.setResponseStatusCode(ResponseStatusCode.OK);
-				break;
-			case TOGGLE:
-				SampleController.toggleLamp(lampid);
-				response.setResponseStatusCode(ResponseStatusCode.OK);
-				break;
-			case ALL_ON:
-				SampleController.setAllOn();
-				response.setResponseStatusCode(ResponseStatusCode.OK);
-				break;
-			case ALL_OFF:
-				SampleController.setAllOff();
-				response.setResponseStatusCode(ResponseStatusCode.OK);
-				break;
-			case ALL_TOGGLE:
-				SampleController.toogleAll();
-            	response.setResponseStatusCode(ResponseStatusCode.OK);
-            	break;
-			case GET_STATE:
-				// Shall not get there...
-				throw new BadRequestException();
-			case GET_STATE_DIRECT:
-				String content = SampleController.getFormatedLampState(lampid);
-				LOGGER.info("Response content: " + content);
-				System.out.println(content);
-				response.setContent(content);
-				request.setReturnContentType(MimeMediaType.OBIX);
-				response.setResponseStatusCode(ResponseStatusCode.OK);
-				break;
-			default:
-				throw new BadRequestException();
-			}
+		default:
+			throw new BadRequestException();
 		}
 		if(response.getResponseStatusCode() == null){
 			response.setResponseStatusCode(ResponseStatusCode.BAD_REQUEST);
@@ -126,31 +105,19 @@ public class SampleRouter implements InterworkingService{
 	}
 	
 	
-	public String sampleResponse() {
-		String content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
-				"<m2m:cin xmlns:m2m=\"http://www.onem2m.org/xml/protocols\" xmlns:hd=\"http://www.onem2m.org/xml/protocols/homedomain\" rn=\"cin_17913587\">\n" + 
-				"   <ty>4</ty>\n" + 
-				"   <ri>/mn-cse/cin-17913587</ri>\n" + 
-				"   <pi>/mn-cse/cnt-527275723</pi>\n" + 
-				"   <ct>20180422T235050</ct>\n" + 
-				"   <lt>20180422T235050</lt>\n" + 
-				"   <st>0</st>\n" + 
-				"   <cnf>application/obix:0</cnf>\n" + 
-				"   <cs>216</cs>\n" + 
-				"   <con>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?>\n" + 
-				"&lt;obj>\n" + 
-				"    &lt;str val=&quot;LAMP&quot; name=&quot;type&quot;/>\n" + 
-				"    &lt;str val=&quot;Home&quot; name=&quot;location&quot;/>\n" + 
-				"    &lt;str val=&quot;LAMP_0&quot; name=&quot;lampId&quot;/>\n" + 
-				"    &lt;bool val=&quot;false&quot; name=&quot;state&quot;/>\n" + 
-				"&lt;/obj>\n" + 
-				"</con>\n" + 
-				"</m2m:cin>\n" + 
-				"";
+	public String customResponse(String engCurve, String frmTimes, String PEF, String FEF, String FVC, String FEV1 ) {
+		 String content = "{\n" + 
+				 	"    \"eng_curve\": " + engCurve + ",\n" + 
+					"    \"frm_times\": " + frmTimes + ",\n" + 
+					"    \"PEF\": " + PEF + ",\n" + 
+					"    \"FEF\": " + FEF + ",\n" + 
+					"    \"FVC\": " + FVC + ",\n" + 
+					"    \"FEV1\": " + FEV1 + "\n" + 
+					"}";
 		
 		return content;
 	}
-
+	
 	@Override
 	public String getAPOCPath() {
 		return SampleConstants.POA;

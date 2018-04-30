@@ -26,17 +26,9 @@ import org.eclipse.om2m.commons.exceptions.BadRequestException;
  */
 public enum Operations {
 	
-	GET_STATE("getState"),
-	GET_STATE_DIRECT("getStateDirect"),
-	SET_ON("setOn"),
-	SET_OFF("setOff"),
-	TOGGLE("toggle"),
-	ALL_ON("allOn"),
-	ALL_OFF("allOff"),
-	ALL_TOGGLE("allToggle"),
-	CREATE_RECORD("createRecord"),
-	GET_TIMELINE("getTimeline"),
-	CREATE_USER("createUser");
+	CREATE_RECORD("CreateRecord"),
+	GET_TIMELINE("GetTimeline"),
+	CREATE_USER("CreateNewUser");
 	
 	
 	

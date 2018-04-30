@@ -59,7 +59,7 @@ public class ObixUtil {
 		// OP GetState from SCL IPU
 		Op opStateDirect = new Op();
 		opStateDirect.setName("getState(Direct)");
-		opStateDirect.setHref(new Uri(prefix + "?op="+ Operations.GET_STATE_DIRECT+"&lampid=" + appId));
+//		opStateDirect.setHref(new Uri(prefix + "?op="+ Operations.GET_STATE_DIRECT+"&lampid=" + appId));
 		opStateDirect.setIs(new Contract("execute"));
 		opStateDirect.setIn(new Contract("obix:Nil"));
 		opStateDirect.setOut(new Contract("obix:Nil"));
@@ -67,7 +67,7 @@ public class ObixUtil {
 		// OP SwitchON
 		Op opON = new Op();
 		opON.setName("switchON");
-		opON.setHref(new Uri(prefix + "?op="+ Operations.SET_ON +"&lampid=" + appId));
+//		opON.setHref(new Uri(prefix + "?op="+ Operations.SET_ON +"&lampid=" + appId));
 		opON.setIs(new Contract("execute"));
 		opON.setIn(new Contract("obix:Nil"));
 		opON.setOut(new Contract("obix:Nil"));
@@ -75,7 +75,7 @@ public class ObixUtil {
 		// OP SwitchOFF
 		Op opOFF = new Op();
 		opOFF.setName("switchOFF");
-		opOFF.setHref(new Uri(prefix  + "?op=" + Operations.SET_OFF + "&lampid=" + appId));
+//		opOFF.setHref(new Uri(prefix  + "?op=" + Operations.SET_OFF + "&lampid=" + appId));
 		opOFF.setIs(new Contract("execute"));
 		opOFF.setIn(new Contract("obix:Nil"));
 		opOFF.setOut(new Contract("obix:Nil"));
@@ -83,7 +83,7 @@ public class ObixUtil {
 		// OP Toggle
 		Op opToggle = new Op();
 		opToggle.setName("toggle");
-		opToggle.setHref(new Uri(prefix + "?op="+ Operations.TOGGLE +"&lampid=" + appId));
+//		opToggle.setHref(new Uri(prefix + "?op="+ Operations.TOGGLE +"&lampid=" + appId));
 		opToggle.setIs(new Contract("execute"));
 		opToggle.setIn(new Contract("obix:Nil"));
 		opToggle.setOut(new Contract("obix:Nil"));
@@ -112,20 +112,20 @@ public class ObixUtil {
 		String prefix = SampleConstants.CSE_ID +"/"+ Constants.CSE_NAME + "/" + "LAMP_ALL";
 		Obj descriptor = new Obj();
 		Op opSwitchOn = new Op();
-		opSwitchOn.setName(Operations.SET_ON.toString());
-		opSwitchOn.setHref(prefix + "?op="+ Operations.ALL_ON);
+//		opSwitchOn.setName(Operations.SET_ON.toString());
+//		opSwitchOn.setHref(prefix + "?op="+ Operations.ALL_ON);
 		opSwitchOn.setIs(new Contract("execute"));
 		descriptor.add(opSwitchOn);
 
 		Op opSwitchOff = new Op();
-		opSwitchOff.setName(Operations.SET_OFF.toString());
-		opSwitchOff.setHref(prefix + "?op=" + Operations.ALL_OFF);
+//		opSwitchOff.setName(Operations.SET_OFF.toString());
+//		opSwitchOff.setHref(prefix + "?op=" + Operations.ALL_OFF);
 		opSwitchOff.setIs(new Contract("execute"));
 		descriptor.add(opSwitchOff);
 
 		Op opToggleAll = new Op();
-		opToggleAll.setName(Operations.ALL_TOGGLE.toString());
-		opToggleAll.setHref(prefix + "?op=" + Operations.ALL_TOGGLE);
+//		opToggleAll.setName(Operations.ALL_TOGGLE.toString());
+//		opToggleAll.setHref(prefix + "?op=" + Operations.ALL_TOGGLE);
 		opToggleAll.setIs(new Contract("execute"));
 		descriptor.add(opToggleAll);
 		return ObixEncoder.toString(descriptor);

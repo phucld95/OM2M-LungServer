@@ -57,20 +57,15 @@ public class SampleController {
 	}
 	
 	public static void setAllOn(){
-		setLampState(SampleConstants.LAMP_0, true);
-		setLampState(SampleConstants.LAMP_1, true);
+	
 	}
 	
 	public static void setAllOff(){
-		setLampState(SampleConstants.LAMP_0, false);
-		setLampState(SampleConstants.LAMP_1, false);
+		
 	}
 	
 	public static void toogleAll(){
-		boolean newState = !(SampleModel.getLampValue(SampleConstants.LAMP_0) 
-				&& SampleModel.getLampValue(SampleConstants.LAMP_1));
-		setLampState(SampleConstants.LAMP_0, newState);
-		setLampState(SampleConstants.LAMP_1, newState);
+		
 	}
 
 	public static void setCse(CseService cse){
