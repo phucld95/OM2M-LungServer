@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.om2m.commons.exceptions.BadRequestException;
-import org.eclipse.om2m.ipe.sample.model.Lamp;
+import org.eclipse.om2m.ipe.sample.model.Plugin;
 
 public class SampleModel {
 	
-	private static Map<String,Lamp> LAMPS = new HashMap<String, Lamp>();
+	private static Map<String,Plugin> LAMPS = new HashMap<String, Plugin>();
 	private static List<LampObserver> OBSERVERS = new ArrayList<LampObserver>();
 	
 	private SampleModel(){
@@ -94,7 +94,7 @@ public class SampleModel {
 	}
 
 	public static void setModel(
-			Map<String, Lamp> lamps2) {
+			Map<String, Plugin> lamps2) {
 		LAMPS = lamps2;
 	}
 	

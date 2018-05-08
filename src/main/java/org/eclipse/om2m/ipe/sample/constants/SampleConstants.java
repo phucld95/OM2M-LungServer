@@ -18,6 +18,8 @@ public class SampleConstants {
 	public static final String DESC = "DESCRIPTOR";
 	public static final String AE_NAME = "AE_IPE_SAMPLE";
 	public static final String QUERY_STRING_OP = "op";
+	public static final String APP_NAME = "LUNG_FUNCTION";
+
 	
 	public static String CSE_ID = "/" + Constants.CSE_ID;
 	public static String CSE_PREFIX = CSE_ID + "/" + Constants.CSE_NAME;

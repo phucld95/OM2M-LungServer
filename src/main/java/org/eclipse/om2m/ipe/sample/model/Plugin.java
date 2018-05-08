@@ -17,30 +17,39 @@
  *
  * New contributors :
  *******************************************************************************/
-package org.eclipse.om2m.ipe.sample.monitor;
+package org.eclipse.om2m.ipe.sample.model;
 
-import org.eclipse.om2m.ipe.sample.controller.SampleController;
+public class Plugin {
 
-/**
- * This class is simply to show the architecture and to reflect the action
- * from the real devices. Here we simulate the reception of the switch signal.
- *
- */
-public class SampleMonitor {
-	
-	/**
-	 * Switch on or off a specific lamp
-	 * @param lampId
-	 */
-	public static void switchLamp(String lampId){
-		SampleController.toggleLamp(lampId);
-	}
-	
-	/**
-	 * Toggle all lamps 
-	 */
-	public static void switchAll(){
-		SampleController.toogleAll();
+    /** Default device location */
+    public final static String LOCATION = "Home";
+    /** Toggle */
+    public final static String TOGGLE = "toggle";
+    /** Default device type */
+    public final static String TYPE = "LAMP";
+    /** device state */
+    private boolean state = false;
+    private String deviceId;
+    
+    public Plugin(String deviceId, boolean initState){
+    	this.deviceId = deviceId;
+    	this.state = initState;
+    }
+
+	public boolean getState() {
+		return state;
 	}
 
+	public void setState(boolean state) {
+		this.state = state;
+	}
+
+	public String getDeviceId() {
+		return deviceId;
+	}
+
+	public void setDeviceId(String lampId) {
+		this.deviceId = lampId;
+	}
+	
 }

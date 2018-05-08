@@ -30,7 +30,7 @@ import org.eclipse.om2m.commons.obix.Uri;
 import org.eclipse.om2m.commons.obix.io.ObixEncoder;
 import org.eclipse.om2m.ipe.sample.constants.Operations;
 import org.eclipse.om2m.ipe.sample.constants.SampleConstants;
-import org.eclipse.om2m.ipe.sample.model.Lamp;
+import org.eclipse.om2m.ipe.sample.model.Plugin;
 
 public class ObixUtil {
 	
@@ -45,8 +45,8 @@ public class ObixUtil {
 		String prefix = cseId+"/"+ Constants.CSE_NAME + "/" + appId;
 		// oBIX
 		Obj obj = new Obj();
-		obj.add(new Str("type",Lamp.TYPE));
-		obj.add(new Str("location",Lamp.LOCATION));
+		obj.add(new Str("type",Plugin.TYPE));
+		obj.add(new Str("location",Plugin.LOCATION));
 		obj.add(new Str("appId",appId));
 		// OP GetState from SCL DataBase
 		Op opState = new Op();
@@ -101,8 +101,8 @@ public class ObixUtil {
 	public static String getStateRep(String lampId, boolean value) {
 		// oBIX
 		Obj obj = new Obj();
-		obj.add(new Str("type",Lamp.TYPE));
-		obj.add(new Str("location",Lamp.LOCATION));
+		obj.add(new Str("type",Plugin.TYPE));
+		obj.add(new Str("location",Plugin.LOCATION));
 		obj.add(new Str("lampId",lampId));
 		obj.add(new Bool("state",value));
 		return ObixEncoder.toString(obj);
