@@ -85,12 +85,16 @@ public class RequestSender {
 	}
 	
 	public static String getFFT(String record) {
-	    String params = "{ \"record\" : \"" + record +"\"}";
-		return excutePost(SampleConstants.FFT_BASE_URL, params);
+	    String params = "{ \"stream_file\" : \"" + record +"\"}";
+	    String content = excutePost(SampleConstants.FFT_URL, params);
+		System.out.println(content);
+	    return content;
 	}
 	
 	public static String postToPoliLearnServer(String params) {		
-		return excutePost(SampleConstants.POLI_BASE_URL, params);
+		String content = excutePost(SampleConstants.POLI_URL, params);
+		System.out.println(content);
+		return content;
 	}
 	
 	private static String excutePost(String targetURL, String urlParameters){
@@ -102,7 +106,8 @@ public class RequestSender {
 	      connection = (HttpURLConnection)url.openConnection();
 	      connection.setRequestMethod("POST");
 	      connection.setRequestProperty("Content-Type", 
-	           "application/x-www-form-urlencoded");
+	           "application/json");
+	      connection.setDoOutput(true);
 
 	      //Send request
 	      DataOutputStream wr = new DataOutputStream (connection.getOutputStream ());
