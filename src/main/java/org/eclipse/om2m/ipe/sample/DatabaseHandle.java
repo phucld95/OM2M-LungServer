@@ -32,6 +32,8 @@ public class DatabaseHandle {
 		
 		String name = params.getAsJsonObject().get("name").getAsString();;
 		String age = params.getAsJsonObject().get("age").getAsString();
+		String email = params.getAsJsonObject().get("email").getAsString();;
+		String password = params.getAsJsonObject().get("password").getAsString();
 		String dayOfBirth = params.getAsJsonObject().get("day_of_birth").getAsString();
 		String weight = params.getAsJsonObject().get("weight").getAsString();
 		String heght = params.getAsJsonObject().get("height").getAsString();
@@ -41,6 +43,8 @@ public class DatabaseHandle {
 		BasicDBObject doc1 = new BasicDBObject();
 	    doc1.append("_id", String.valueOf(userId));
 	    doc1.append("name", name);
+	    doc1.append("email", email);
+	    doc1.append("password", password);
 	    doc1.append("dayOfBirth", dayOfBirth);
 	    doc1.append("weight", weight);
 	    doc1.append("age", age);
