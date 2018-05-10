@@ -5,6 +5,15 @@ import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.DBCursor;
+
+import java.net.URI;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.eclipse.om2m.ipe.sample.constants.SampleConstants;
 
 import com.google.gson.Gson;
@@ -21,7 +30,7 @@ public class DatabaseHandle {
 	
 	private void DatabaseHandle() {}
 
-	public long saveUser(JsonElement params) {
+	public BasicDBObject saveUser(JsonElement params) {
 		MongoClient mongoClient = new MongoClient(new MongoClientURI(SampleConstants.DB_SERVER));
 	    DB database = mongoClient.getDB(SampleConstants.DB_NAME);
 		DBCollection users = database.getCollection(SampleConstants.TB_USER);
@@ -36,7 +45,8 @@ public class DatabaseHandle {
 		String password = params.getAsJsonObject().get("password").getAsString();
 		String dayOfBirth = params.getAsJsonObject().get("day_of_birth").getAsString();
 		String weight = params.getAsJsonObject().get("weight").getAsString();
-		String heght = params.getAsJsonObject().get("height").getAsString();
+		String height = params.getAsJsonObject().get("height").getAsString();
+		String gender = params.getAsJsonObject().get("gender").getAsString();
 		String location = params.getAsJsonObject().get("location").getAsString();
 		String smokingStatus = params.getAsJsonObject().get("smoking_status").getAsString();
 						
@@ -48,13 +58,16 @@ public class DatabaseHandle {
 	    doc1.append("dayOfBirth", dayOfBirth);
 	    doc1.append("weight", weight);
 	    doc1.append("age", age);
-	    doc1.append("heght", heght);
+	    doc1.append("height", height);
+	    doc1.append("gender", gender);
 	    doc1.append("location", location);
+	    doc1.append("isAdmin", "0");
 	    doc1.append("smokingStatus", smokingStatus);
 	    users.insert(doc1);
 		
+	    doc1.remove("password");
 	    mongoClient.close();
-		return userId;
+		return doc1;
 	}
 	
 	public long saveRecord(String user, String record, String engCurve, String frmTimes,String PEF, String FVC, String FEV1, String  flowCurve, String volumes) {
@@ -81,6 +94,36 @@ public class DatabaseHandle {
 		
 	    mongoClient.close();
 		return recordId;
+	}
+	
+//	
+//	public static void main(String[] args) throws Exception {
+//		 BasicDBObject obj = gestUser("lephuc@gmail.com", "12345678");
+//		 System.out.println(obj);
+//	   }
+	
+	public static BasicDBObject gestUser(String email, String password) {
+		MongoClient mongoClient = new MongoClient(new MongoClientURI(SampleConstants.DB_SERVER));
+	    DB database = mongoClient.getDB(SampleConstants.DB_NAME);
+		DBCollection users = database.getCollection(SampleConstants.TB_USER);
+	
+		BasicDBObjectBuilder whereBuilder = BasicDBObjectBuilder.start();
+		whereBuilder.append("email", email);
+		whereBuilder.append("password", password);
+		DBObject where  = whereBuilder.get();
+		        
+		// Query
+		DBCursor cursor = users.find(where);
+
+		if(cursor.hasNext()) {
+			BasicDBObject obj = (BasicDBObject) cursor.next();
+			obj.remove("password");
+		    mongoClient.close();
+		    return obj;
+		} else {
+		    mongoClient.close();
+			return null;
+		}		
 	}
 
 }

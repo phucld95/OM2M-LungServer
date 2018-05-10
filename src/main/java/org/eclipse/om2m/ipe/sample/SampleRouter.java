@@ -34,6 +34,7 @@ import org.eclipse.om2m.ipe.sample.controller.SampleController;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.mongodb.BasicDBObject;
  
 
 public class SampleRouter implements InterworkingService{
@@ -42,6 +43,19 @@ public class SampleRouter implements InterworkingService{
 
 	@Override
 	public ResponsePrimitive doExecute(RequestPrimitive request) {
+		String id;
+	    String name;		    
+	    String email;
+	    String weight;
+	    String dayOfBirth;
+	    String age;		    
+	    String height;
+	    String gender;
+	    String location;
+	    String isAdmin;		    
+	    String smokingStatus;
+	    BasicDBObject obj;
+
 		// Request execute
 		ResponsePrimitive response = new ResponsePrimitive(request);
 		System.out.print("---------------------------------------");
@@ -59,8 +73,31 @@ public class SampleRouter implements InterworkingService{
 
 		switch(op){
 		case CREATE_USER:
-			long userId = DatabaseHandle.getInstance().saveUser(params);
-			response.setContent("{\"user_id\" : " + String.valueOf(userId) + " }");
+		    obj = DatabaseHandle.getInstance().saveUser(params);
+		    id = obj.getString("_id");
+		    name = obj.getString("name");		    
+		    email = obj.getString("email");
+		    weight = obj.getString("weight");
+		    dayOfBirth = obj.getString("dayOfBirth");
+		    age = obj.getString("age");		    
+		    height = obj.getString("height");
+		    gender = obj.getString("gender");
+		    location = obj.getString("location");
+		    isAdmin = obj.getString("isAdmin");		    
+		    smokingStatus = obj.getString("smokingStatus");
+			
+		    response.setContent("{\"user_id\" : \"" + id + "\",\n"
+		    		+ "\"name\" : \"" + name + "\",\n"
+		    		+ "\"email\" : \"" + email + "\",\n"
+		    		+ "\"weight\" : \"" + weight + "\",\n"
+		    		+ "\"dayOfBirth\" : \"" + dayOfBirth + "\",\n"
+		    		+ "\"age\" : \"" + age + "\",\n"
+		    		+ "\"heght\" : \"" + height + "\",\n"
+		    		+ "\"gender\" : \"" + gender + "\",\n"
+		    		+ "\"location\" : \"" + location + "\",\n"
+		    		+ "\"isAdmin\" : \"" + isAdmin + "\",\n"
+		    		+ "\"smokingStatus\" : \"" + smokingStatus + "\"\n"	
+		    		+ "}");
 			response.setResponseStatusCode(ResponseStatusCode.OK);
 			break;
 		
@@ -93,6 +130,50 @@ public class SampleRouter implements InterworkingService{
 				
 		case GET_TIMELINE:
 			LOGGER.info("Response content: " + "");
+			response.setResponseStatusCode(ResponseStatusCode.OK);
+			break;
+			
+		case LOGIN:
+			String emailC = params.getAsJsonObject().get("email").getAsString();	
+			String passwordC = params.getAsJsonObject().get("password").getAsString();	
+		    obj = DatabaseHandle.getInstance().gestUser(emailC, passwordC);			
+		    System.out.println("email " + emailC);		    
+		    System.out.println("password " + passwordC);
+		    System.out.println(obj);
+
+		    if (obj != null) {
+			    System.out.println("run in obj # null");
+
+		    	id = obj.getString("_id");
+			    name = obj.getString("name");		    
+			    email = obj.getString("email");
+			    weight = obj.getString("weight");
+			    dayOfBirth = obj.getString("dayOfBirth");
+			    age = obj.getString("age");		    
+			    height = obj.getString("height");
+			    gender = obj.getString("gender");
+			    location = obj.getString("location");
+			    isAdmin = obj.getString("isAdmin");		    
+			    smokingStatus = obj.getString("smokingStatus");
+				
+			    System.out.println("get done");
+
+			    response.setContent("{\"user_id\" : \"" + id + "\",\n"
+			    		+ "\"name\" : \"" + name + "\",\n"
+			    		+ "\"email\" : \"" + email + "\",\n"
+			    		+ "\"weight\" : \"" + weight + "\",\n"
+			    		+ "\"dayOfBirth\" : \"" + dayOfBirth + "\",\n"
+			    		+ "\"age\" : \"" + age + "\",\n"
+			    		+ "\"height\" : \"" + height + "\",\n"
+			    		+ "\"gender\" : \"" + gender + "\",\n"
+			    		+ "\"location\" : \"" + location + "\",\n"
+			    		+ "\"isAdmin\" : \"" + isAdmin + "\",\n"
+			    		+ "\"smokingStatus\" : \"" + smokingStatus + "\"\n"	
+			    		+ "}");
+		    } else {
+		    	 response.setContent("{\"success\" : 0\n}");
+		    }
+		    
 			response.setResponseStatusCode(ResponseStatusCode.OK);
 			break;
 			

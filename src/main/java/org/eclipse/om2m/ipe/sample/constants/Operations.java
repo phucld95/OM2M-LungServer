@@ -29,8 +29,7 @@ public enum Operations {
 	CREATE_RECORD("CreateRecord"),
 	GET_TIMELINE("GetTimeline"),
 	CREATE_USER("CreateNewUser"),
-	LOGIN("Login"),
-	TIMELINE("Timeline");
+	LOGIN("Login");
 	
 	private final String value;
 	
