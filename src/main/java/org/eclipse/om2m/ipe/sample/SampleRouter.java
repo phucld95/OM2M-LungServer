@@ -78,15 +78,16 @@ public class SampleRouter implements InterworkingService{
 			String poliServerResponseString = RequestSender.postToPoliLearnServer(contentString);
 			JsonElement poliServerResponseJson = gson.fromJson(poliServerResponseString, JsonElement.class);
 			String PEF = poliServerResponseJson.getAsJsonObject().get("PEF").getAsString();			
-			String FEF = poliServerResponseJson.getAsJsonObject().get("FEF").getAsString();			
 			String FVC = poliServerResponseJson.getAsJsonObject().get("FVC").getAsString();			
 			String FEV1 = poliServerResponseJson.getAsJsonObject().get("FEV1").getAsString();			
-
+			String flowCurve = poliServerResponseJson.getAsJsonObject().get("flow_curve").getAsJsonArray().toString();
+			String volumes = poliServerResponseJson.getAsJsonObject().get("volumes").getAsJsonArray().toString(); 
+			
 			//Save recored to db
-			long recordId = DatabaseHandle.getInstance().saveRecord(user, record, engCurve, frmTimes, PEF, FEF, FVC, FEV1);
+			long recordId = DatabaseHandle.getInstance().saveRecord(user, record, engCurve, frmTimes, PEF, FVC, FEV1, flowCurve, volumes);
 
 			//Create response.
-			response.setContent(this.customResponse(engCurve, frmTimes, PEF, FEF, FVC, FEV1));
+			response.setContent(this.customResponse(engCurve, frmTimes, PEF, FVC, FEV1, flowCurve, volumes));
 			response.setResponseStatusCode(ResponseStatusCode.OK);
 			break;
 				
@@ -105,12 +106,13 @@ public class SampleRouter implements InterworkingService{
 	}
 	
 	
-	public String customResponse(String engCurve, String frmTimes, String PEF, String FEF, String FVC, String FEV1 ) {
+	public String customResponse(String engCurve, String frmTimes, String PEF, String FVC, String FEV1, String  flowCurve, String volumes) {
 		 String content = "{\n" + 
 				 	"    \"eng_curve\": " + engCurve + ",\n" + 
 					"    \"frm_times\": " + frmTimes + ",\n" + 
+					"    \"flow_curve\": " + flowCurve + ",\n" + 
+					"    \"volumes\": " + volumes + ",\n" +
 					"    \"PEF\": " + PEF + ",\n" + 
-					"    \"FEF\": " + FEF + ",\n" + 
 					"    \"FVC\": " + FVC + ",\n" + 
 					"    \"FEV1\": " + FEV1 + "\n" + 
 					"}";

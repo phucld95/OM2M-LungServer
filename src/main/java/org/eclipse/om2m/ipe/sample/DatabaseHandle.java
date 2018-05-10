@@ -53,7 +53,7 @@ public class DatabaseHandle {
 		return userId;
 	}
 	
-	public long saveRecord(String user, String record, String engCurve, String frmTimes, String PEF, String FEF, String FVC, String FEV1 ) {
+	public long saveRecord(String user, String record, String engCurve, String frmTimes,String PEF, String FVC, String FEV1, String  flowCurve, String volumes) {
 		MongoClient mongoClient = new MongoClient(new MongoClientURI(SampleConstants.DB_SERVER));
 	    DB database = mongoClient.getDB(SampleConstants.DB_NAME);
 		DBCollection records = database.getCollection(SampleConstants.TB_RECORD);
@@ -69,9 +69,10 @@ public class DatabaseHandle {
 	    doc1.append("engCurve", engCurve);
 	    doc1.append("frmTimes", frmTimes);
 	    doc1.append("PEF", PEF);
-	    doc1.append("FEF", FEF);
 	    doc1.append("FVC", FVC);
 	    doc1.append("FEV1", FEV1);
+	    doc1.append("flowCurve", flowCurve);
+	    doc1.append("volumes", volumes);
 	    records.insert(doc1);
 		
 	    mongoClient.close();
