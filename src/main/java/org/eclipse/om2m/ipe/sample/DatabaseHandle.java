@@ -4,9 +4,15 @@ package org.eclipse.om2m.ipe.sample;
 import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.DBCursor;
 
 import java.net.URI;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -90,19 +96,24 @@ public class DatabaseHandle {
 	    doc1.append("FEV1", FEV1);
 	    doc1.append("flowCurve", flowCurve);
 	    doc1.append("volumes", volumes);
+	    doc1.append("time", getToday());
 	    records.insert(doc1);
 		
 	    mongoClient.close();
 		return recordId;
 	}
+
 	
-//	
-//	public static void main(String[] args) throws Exception {
-//		 BasicDBObject obj = gestUser("lephuc@gmail.com", "12345678");
-//		 System.out.println(obj);
-//	   }
+	private String getToday() {
+		Date date = new Date();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        df.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+        String dateString = df.format(date);
+        return dateString;
+        
+	}
 	
-	public static BasicDBObject gestUser(String email, String password) {
+	public BasicDBObject gestUser(String email, String password) {
 		MongoClient mongoClient = new MongoClient(new MongoClientURI(SampleConstants.DB_SERVER));
 	    DB database = mongoClient.getDB(SampleConstants.DB_NAME);
 		DBCollection users = database.getCollection(SampleConstants.TB_USER);
@@ -125,5 +136,35 @@ public class DatabaseHandle {
 			return null;
 		}		
 	}
+	
+	public List<BasicDBObject> getTimeline(String userId) {
+		MongoClient mongoClient = new MongoClient(new MongoClientURI(SampleConstants.DB_SERVER));
+	    DB database = mongoClient.getDB(SampleConstants.DB_NAME);
+		DBCollection users = database.getCollection(SampleConstants.TB_RECORD);
+	
+		BasicDBObjectBuilder whereBuilder = BasicDBObjectBuilder.start();
+		whereBuilder.append("userId", userId);
+		DBObject where  = whereBuilder.get();
+		        
+		// Query
+		DBCursor cursor = users.find(where);
+		List<BasicDBObject> result = new ArrayList<BasicDBObject>();
+
+		while (cursor.hasNext()) {
+			BasicDBObject obj = (BasicDBObject) cursor.next();
+			obj.remove("record");
+		    result.add(obj);
+	    }
+	    mongoClient.close();
+		return result;
+	}
+	
+	
+	
+//	public static void main(String[] args) throws Exception {
+//		List<BasicDBObject> result = getTimeline("1");
+//		String a = "{\"result\" : " + result.toString() + "}";
+//		System.out.println(a);
+//	}
 
 }

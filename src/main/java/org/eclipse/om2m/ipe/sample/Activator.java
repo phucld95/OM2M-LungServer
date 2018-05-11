@@ -55,7 +55,7 @@ public class Activator implements BundleActivator {
                 new Thread(){
                     public void run(){
                         try {
-//                        	new HadoopConnecter().saveData();
+//                        	new HadoopConnecter().run();
                         	LifeCycleManager.start();
                         } catch (Exception e) {
                             logger.error("IpeMonitor Sample error", e);
