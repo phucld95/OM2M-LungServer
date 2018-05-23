@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Arrays;
 
 
@@ -25,6 +27,7 @@ import org.eclipse.om2m.ipe.sample.controller.SampleController;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mongodb.BasicDBObject;
 
 public class RequestSender {
 	
@@ -68,9 +71,31 @@ public class RequestSender {
 		return SampleController.CSE.doRequest(request);
 	}
 	
-	public static String getFFT(String record) {
-	    String params = "{ \"stream_file\" : \"" + record +"\"}";
-	    params = params.replace("\n", "");
+	public static int calculateAge(LocalDate birthDate) {
+        LocalDate today = LocalDate.now();
+        if (birthDate != null) {
+            return Period.between(birthDate, today).getYears();
+        } else {
+            return 0;
+        }
+    }
+	
+	public static String getFFT(String record, String id) {
+		BasicDBObject user = DataHelper.getInstance().getUser(id);
+		String height = user.getString("height");
+		String weight = user.getString("weight");
+		String date = user.getString("dayOfBirth");
+		
+		String strArray[] = date.split("-") ;
+		date = "";
+		date = date + strArray[2] + "-" + strArray[1] + "-" + strArray[0];
+		 
+		LocalDate localDate = LocalDate.parse(date);
+	    int age = calculateAge(localDate);		
+	    String params = "{ \"stream_file\" : \"" + record +"\","
+	    		+ "\"height\" : \"" + height + "\","
+	    		+ "\"weight\" : \"" + weight + "\","
+	    		+ "\"age\" : \"" + age + "\"}";
 	    String content = excutePost(SampleConstants.FFT_BASE_URL, params);
 	    return content;
 	}

@@ -40,9 +40,9 @@ import com.google.gson.JsonObject;
 import com.mongodb.BasicDBObject;
  
 
-public class SampleRouter implements InterworkingService{
+public class Router implements InterworkingService{
 
-	private static Log LOGGER = LogFactory.getLog(SampleRouter.class);
+	private static Log LOGGER = LogFactory.getLog(Router.class);
 
 	
 //	public static void main(String[] args) throws Exception {
@@ -79,7 +79,7 @@ public class SampleRouter implements InterworkingService{
 	    String height;
 	    String gender;
 	    String location;
-	    String isAdmin;		    
+	    String isCaretakers;		    
 	    String smokingStatus;
 	    BasicDBObject obj;
 	    JsonElement temp;
@@ -101,18 +101,17 @@ public class SampleRouter implements InterworkingService{
 
 		switch(op){
 		case CREATE_USER:
-		    obj = DatabaseHandle.getInstance().saveUser(params);
+		    obj = DataHelper.getInstance().saveUser(params);
 		    if (obj != null) {
 		    	id = obj.getString("_id");
 			    name = obj.getString("name");		    
 			    email = obj.getString("email");
 			    weight = obj.getString("weight");
 			    dayOfBirth = obj.getString("dayOfBirth");
-			    age = obj.getString("age");		    
 			    height = obj.getString("height");
 			    gender = obj.getString("gender");
 			    location = obj.getString("location");
-			    isAdmin = obj.getString("isAdmin");		    
+			    isCaretakers = obj.getString("isCaretakers");		    
 			    smokingStatus = obj.getString("smokingStatus");
 				
 			    response.setContent("{\"status\" : \"success\",\n"
@@ -121,11 +120,10 @@ public class SampleRouter implements InterworkingService{
 			    		+ "\"email\" : \"" + email + "\",\n"
 			    		+ "\"weight\" : \"" + weight + "\",\n"
 			    		+ "\"dayOfBirth\" : \"" + dayOfBirth + "\",\n"
-			    		+ "\"age\" : \"" + age + "\",\n"
 			    		+ "\"height\" : \"" + height + "\",\n"
 			    		+ "\"gender\" : \"" + gender + "\",\n"
 			    		+ "\"location\" : \"" + location + "\",\n"
-			    		+ "\"isAdmin\" : \"" + isAdmin + "\",\n"
+			    		+ "\"isCaretakers\" : \"" + isCaretakers + "\",\n"
 			    		+ "\"smokingStatus\" : \"" + smokingStatus + "\"\n"	
 			    		+ "}");
 		    } else {
@@ -134,7 +132,37 @@ public class SampleRouter implements InterworkingService{
 		    
 			response.setResponseStatusCode(ResponseStatusCode.OK);
 			break;
-		
+		case FOLLOW:
+		    obj = DataHelper.getInstance().followUser(params);
+		    if (obj != null) {
+			    response.setContent("{\"status\" : \"success\"}");
+		    } else {
+		    	response.setContent("{\"status\" : \"false\"}");
+		    }
+			response.setResponseStatusCode(ResponseStatusCode.OK);
+			break;
+		case UNFOLLOW:
+			boolean rp = DataHelper.getInstance().unfollowUser(params);
+		    if (rp == true) {
+			    response.setContent("{\"status\" : \"success\"}");
+		    } else {
+		    	response.setContent("{\"status\" : \"false\"}");
+		    }
+			response.setResponseStatusCode(ResponseStatusCode.OK);
+			break;
+		case GET_FOLLOWED:
+			temp = params.getAsJsonObject().get("user_id");
+			if (temp == null) {
+				response.setContent("{\"status\" : \"false\"}");
+		    	response.setResponseStatusCode(ResponseStatusCode.OK);
+			} else {
+				String userId = temp.getAsString();
+				List<BasicDBObject> result = DataHelper.getInstance().getFollowed(userId);
+				String jsonContent = "{\"result\" : " + result.toString() + "}";
+				response.setContent(jsonContent);
+				response.setResponseStatusCode(ResponseStatusCode.OK);
+			}
+			break;
 		case CREATE_RECORD:
 			JsonElement userJ = params.getAsJsonObject().get("user_id");
 			JsonElement recordJ = params.getAsJsonObject().get("record");
@@ -146,12 +174,17 @@ public class SampleRouter implements InterworkingService{
 			}
 			String user = userJ.getAsString();
 			String record = recordJ.getAsString();			
-			
+			record = record.replace("\n", "");
+
 			//Send request to FFT server and handle response.
-			String contentString = RequestSender.getFFT(record);
+			
+			String contentString = RequestSender.getFFT(record, user);
 			JsonElement contentJson = gson.fromJson(contentString, JsonElement.class);
 			String engCurve = contentJson.getAsJsonObject().get("eng_curve").getAsJsonArray().toString();
 			String frmTimes = contentJson.getAsJsonObject().get("frm_times").getAsJsonArray().toString();			
+			String pred_PEF = contentJson.getAsJsonObject().get("pred_PEF").getAsString().toString();
+			String pred_FEV1 = contentJson.getAsJsonObject().get("pred_FEV1").getAsString().toString();			
+			String pred_FVC = contentJson.getAsJsonObject().get("pred_FVC").getAsString().toString();			
 			
 			if (contentString == null) {
 		    	response.setContent("{\"status\" : \"false\"\n}");
@@ -174,10 +207,10 @@ public class SampleRouter implements InterworkingService{
 				break;
 			}
 			//Save recored to db
-			long recordId = DatabaseHandle.getInstance().saveRecord(user, record, engCurve, frmTimes, PEF, FVC, FEV1, flowCurve, volumes);
+			long recordId = DataHelper.getInstance().saveRecord(user, record, engCurve, frmTimes, PEF, FVC, FEV1, flowCurve, volumes, pred_PEF, pred_FEV1, pred_FVC);
 
 			//Create response.
-			response.setContent(this.customResponse(engCurve, frmTimes, PEF, FVC, FEV1, flowCurve, volumes));
+			response.setContent(this.customResponse(engCurve, frmTimes, PEF, FVC, FEV1, flowCurve, volumes, pred_PEF, pred_FEV1, pred_FVC));
 			response.setResponseStatusCode(ResponseStatusCode.OK);
 			break;
 				
@@ -188,17 +221,29 @@ public class SampleRouter implements InterworkingService{
 		    	response.setResponseStatusCode(ResponseStatusCode.OK);
 			} else {
 				String userId = temp.getAsString();
-				List<BasicDBObject> result = DatabaseHandle.getInstance().getTimeline(userId);
+				List<BasicDBObject> result = DataHelper.getInstance().getTimeline(userId);
 				String jsonContent = "{\"result\" : " + result.toString() + "}";
 				response.setContent(jsonContent);
 				response.setResponseStatusCode(ResponseStatusCode.OK);
 			}
 			break;
-			
+		case SEARCH_USER:
+			temp = params.getAsJsonObject().get("email");
+			if (temp == null) {
+				response.setContent("{\"status\" : \"false\"}");
+		    	response.setResponseStatusCode(ResponseStatusCode.OK);
+			} else {
+				String searchText = temp.getAsString();	
+				List<BasicDBObject> result = DataHelper.getInstance().searchUser(params);
+				String jsonContent = "{\"result\" : " + result.toString() + "}";
+				response.setContent(jsonContent);
+				response.setResponseStatusCode(ResponseStatusCode.OK);
+			}
+			break;
 		case LOGIN:
 			String emailC = params.getAsJsonObject().get("email").getAsString();	
 			String passwordC = params.getAsJsonObject().get("password").getAsString();	
-		    obj = DatabaseHandle.getInstance().gestUser(emailC, passwordC);			
+		    obj = DataHelper.getInstance().gestUser(emailC, passwordC);			
 
 		    if (obj != null) {
 		    	id = obj.getString("_id");
@@ -206,11 +251,10 @@ public class SampleRouter implements InterworkingService{
 			    email = obj.getString("email");
 			    weight = obj.getString("weight");
 			    dayOfBirth = obj.getString("dayOfBirth");
-			    age = obj.getString("age");		    
 			    height = obj.getString("height");
 			    gender = obj.getString("gender");
 			    location = obj.getString("location");
-			    isAdmin = obj.getString("isAdmin");		    
+			    isCaretakers = obj.getString("isCaretakers");		    
 			    smokingStatus = obj.getString("smokingStatus");
 				
 			    response.setContent("{\"status\" : \"success\",\n"
@@ -219,11 +263,10 @@ public class SampleRouter implements InterworkingService{
 			    		+ "\"email\" : \"" + email + "\",\n"
 			    		+ "\"weight\" : \"" + weight + "\",\n"
 			    		+ "\"dayOfBirth\" : \"" + dayOfBirth + "\",\n"
-			    		+ "\"age\" : \"" + age + "\",\n"
 			    		+ "\"height\" : \"" + height + "\",\n"
 			    		+ "\"gender\" : \"" + gender + "\",\n"
 			    		+ "\"location\" : \"" + location + "\",\n"
-			    		+ "\"isAdmin\" : \"" + isAdmin + "\",\n"
+			    		+ "\"isCaretakers\" : \"" + isCaretakers + "\",\n"
 			    		+ "\"smokingStatus\" : \"" + smokingStatus + "\"\n"	
 			    		+ "}");
 		    } else {
@@ -243,7 +286,8 @@ public class SampleRouter implements InterworkingService{
 	}
 	
 	
-	public String customResponse(String engCurve, String frmTimes, String PEF, String FVC, String FEV1, String  flowCurve, String volumes) {
+	public String customResponse(String engCurve, String frmTimes, String PEF, String FVC, String FEV1, String  flowCurve, String volumes,
+			String pred_PEF, String pred_FEV1, String pred_FVC) {
 		 String content = "{\"status\" : \"success\",\n" + 
 				 	"    \"eng_curve\": " + engCurve + ",\n" + 
 					"    \"frm_times\": " + frmTimes + ",\n" + 
@@ -251,7 +295,10 @@ public class SampleRouter implements InterworkingService{
 					"    \"volumes\": " + volumes + ",\n" +
 					"    \"PEF\": " + PEF + ",\n" + 
 					"    \"FVC\": " + FVC + ",\n" + 
-					"    \"FEV1\": " + FEV1 + "\n" + 
+					"    \"FEV1\": " + FEV1 + ",\n" + 
+					"    \"pred_PEF\": " + pred_PEF + ",\n" + 
+					"    \"pred_FEV1\": " + pred_FEV1 + ",\n" + 
+					"    \"pred_FVC\": " + pred_FVC + "\n" +
 					"}";
 		
 		return content;

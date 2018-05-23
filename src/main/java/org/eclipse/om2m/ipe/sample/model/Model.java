@@ -25,24 +25,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.om2m.commons.exceptions.BadRequestException;
-import org.eclipse.om2m.ipe.sample.model.Lamp;
+import org.eclipse.om2m.ipe.sample.model.Device;
 
-public class SampleModel {
+public class Model {
 	
-	private static Map<String,Lamp> LAMPS = new HashMap<String, Lamp>();
+	private static Map<String,Device> DEVICES = new HashMap<String, Device>();
 	private static List<LampObserver> OBSERVERS = new ArrayList<LampObserver>();
 	
-	private SampleModel(){
+	private Model(){
 	}
-	
-	/**
-	 * Sets the lamp state.
-	 * @param lampId - Application ID
-	 * @param value - measured state
-	 */
+
 	public static void setLampState(final String lampId, boolean value) {
 		checkLampIdValue(lampId);
-		LAMPS.get(lampId).setState(value);
+		DEVICES.get(lampId).setState(value);
 		notifyObservers(lampId, value);
 	}
 	
@@ -53,7 +48,7 @@ public class SampleModel {
 	 */
 	public static boolean getLampValue(String lampId) {
 		checkLampIdValue(lampId);
-		return LAMPS.get(lampId).getState();
+		return DEVICES.get(lampId).getState();
 	}
 
 	/**
@@ -61,7 +56,7 @@ public class SampleModel {
 	 * @param lampId
 	 */
 	public static void checkLampIdValue(String lampId){
-		if(lampId == null || !LAMPS.containsKey(lampId)){
+		if(lampId == null || !DEVICES.containsKey(lampId)){
 			throw new BadRequestException("Unknow lamp id");
 		}
 	}
@@ -93,9 +88,8 @@ public class SampleModel {
 		void onLampStateChange(String lampId, boolean state);
 	}
 
-	public static void setModel(
-			Map<String, Lamp> lamps2) {
-		LAMPS = lamps2;
+	public static void setModel(Map<String, Device> lamps2) {
+		DEVICES = lamps2;
 	}
 	
 }

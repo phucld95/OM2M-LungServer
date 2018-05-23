@@ -24,7 +24,7 @@ import org.eclipse.om2m.commons.resource.ContentInstance;
 import org.eclipse.om2m.core.service.CseService;
 import org.eclipse.om2m.ipe.sample.RequestSender;
 import org.eclipse.om2m.ipe.sample.constants.SampleConstants;
-import org.eclipse.om2m.ipe.sample.model.SampleModel;
+import org.eclipse.om2m.ipe.sample.model.Model;
 import org.eclipse.om2m.ipe.sample.util.ObixUtil;
 
 public class SampleController {
@@ -32,30 +32,17 @@ public class SampleController {
 	public static CseService CSE;
 	protected static String AE_ID;
 	
-	public static void setLampState(String lampId, boolean value){
+	public static void setLampState(String deviceId, boolean value){
 		// Set the value in the "real world" model
-		SampleModel.setLampState(lampId, value);
+		Model.setLampState(deviceId, value);
 		// Send the information to the CSE
-		String targetID = SampleConstants.CSE_PREFIX + "/" + lampId + "/" + SampleConstants.DATA;
+		String targetID = SampleConstants.CSE_PREFIX + "/" + deviceId + "/" + SampleConstants.DATA;
 		ContentInstance cin = new ContentInstance();
-		cin.setContent(ObixUtil.getStateRep(lampId, value));
+		cin.setContent(ObixUtil.getStateRep(deviceId, value));
 		cin.setContentInfo(MimeMediaType.OBIX + ":" + MimeMediaType.ENCOD_PLAIN);
 		RequestSender.createContentInstance(targetID, cin);
 	}
-	
-	public static String getFormatedLampState(String lampId){
-		return ObixUtil.getStateRep(lampId, getLampState(lampId));
-	}
-	
-	public static boolean getLampState(String lampId){
-		return SampleModel.getLampValue(lampId);
-	}
-	
-	public static void toggleLamp(String lampId){
-		boolean newState = !SampleModel.getLampValue(lampId);
-		setLampState(lampId, newState);
-	}
-	
+
 	public static void setAllOn(){
 	
 	}

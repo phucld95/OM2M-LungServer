@@ -40,7 +40,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext bundleContext) throws Exception {
-        bundleContext.registerService(InterworkingService.class.getName(), new SampleRouter(), null);
+        bundleContext.registerService(InterworkingService.class.getName(), new Router(), null);
         logger.info("IpeService is registered.");
 
         cseServiceTracker = new ServiceTracker<Object, Object>(bundleContext, CseService.class.getName(), null) {
@@ -54,8 +54,7 @@ public class Activator implements BundleActivator {
                 SampleController.setCse(cseService);
                 new Thread(){
                     public void run(){
-                        try {
-//                        	new HadoopConnecter().run();
+                        try {  	
                         	LifeCycleManager.start();
                         } catch (Exception e) {
                             logger.error("IpeMonitor Sample error", e);

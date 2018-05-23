@@ -11,6 +11,7 @@ public class SampleConstants {
 	public static final String DB_NAME ="YEUHIEN";
 	public static final String TB_USER ="User";
 	public static final String TB_RECORD ="Record";
+	public static final String TB_FOLLOW ="Follow";
 	public static final String DB_SERVER = "mongodb://localhost:12345";
 	public static final String FFT_BASE_URL = FFT_SERVER_URL + "/lung-audio-data/api/get-values/";
 	public static final String POLI_BASE_URL = POLI_SERVER_URL + "/lung-function/api/get-values/";

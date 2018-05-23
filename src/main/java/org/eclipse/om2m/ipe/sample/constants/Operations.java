@@ -29,7 +29,11 @@ public enum Operations {
 	CREATE_RECORD("CreateRecord"),
 	GET_TIMELINE("GetTimeline"),
 	CREATE_USER("CreateNewUser"),
-	LOGIN("Login");
+	LOGIN("Login"),
+	SEARCH_USER("SearchUser"),
+	FOLLOW("CreateFollow"),
+	UNFOLLOW("Unfollow"),
+	GET_FOLLOWED("GetFollowed");
 	
 	private final String value;
 	
