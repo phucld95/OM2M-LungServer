@@ -17,12 +17,9 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.eclipse.om2m.ipe.sample.constants.SampleConstants;
+import org.eclipse.om2m.ipe.sample.model.Record;
+import org.eclipse.om2m.ipe.sample.model.User;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -38,7 +35,7 @@ public class DataHelper {
 	
 	private void DatabaseHandle() {}
 
-	public BasicDBObject saveUser(JsonElement params) {
+	public BasicDBObject saveUser(User user) {
 		MongoClient mongoClient = new MongoClient(new MongoClientURI(SampleConstants.DB_SERVER));
 	    DB database = mongoClient.getDB(SampleConstants.DB_NAME);
 		DBCollection users = database.getCollection(SampleConstants.TB_USER);
@@ -47,16 +44,16 @@ public class DataHelper {
 		    userId = users.count() + 1;
 	    }
 		
-		String name = params.getAsJsonObject().get("name").getAsString();;
-		String email = params.getAsJsonObject().get("email").getAsString();;
-		String password = params.getAsJsonObject().get("password").getAsString();
-		String dayOfBirth = params.getAsJsonObject().get("day_of_birth").getAsString();
-		String weight = params.getAsJsonObject().get("weight").getAsString();
-		String height = params.getAsJsonObject().get("height").getAsString();
-		String gender = params.getAsJsonObject().get("gender").getAsString();
-		String location = params.getAsJsonObject().get("location").getAsString();
-		String smokingStatus = params.getAsJsonObject().get("smoking_status").getAsString();
-		String isCaretakers = params.getAsJsonObject().get("is_caretakers").getAsString();			
+		String name = user.getName();
+		String email = user.getEmail();
+		String password = user.getPassword();
+		String dayOfBirth = user.getDayOfBirth();
+		String weight = user.getWeight();
+		String height = user.getHeight();
+		String gender = user.getGender();
+		String location = user.getLocation();
+		String smokingStatus = user.getSmokingStatus();
+		String isCaretakers = user.getIsCaretakers();		
 		
 		BasicDBObject doc1 = new BasicDBObject();
 	    doc1.append("_id", String.valueOf(userId));
@@ -164,8 +161,7 @@ public class DataHelper {
 		}		
 	}
 	
-	public long saveRecord(String user, String record, String engCurve, String frmTimes,String PEF, String FVC, String FEV1, String  flowCurve, String volumes,
-			String pred_PEF, String pred_FEV1, String pred_FVC) {
+	public long saveRecord(Record record) {		
 		MongoClient mongoClient = new MongoClient(new MongoClientURI(SampleConstants.DB_SERVER));
 	    DB database = mongoClient.getDB(SampleConstants.DB_NAME);
 		DBCollection records = database.getCollection(SampleConstants.TB_RECORD);
@@ -173,10 +169,9 @@ public class DataHelper {
 	    if (database.collectionExists(SampleConstants.TB_RECORD)) {
 	    	recordId = records.count() + 1;
 	    }
-
 	    
 		try {
-			new HadoopHelper().run("RecordID_" + String.valueOf(recordId),record);
+			new HadoopHelper().run("RecordID_" + String.valueOf(recordId),record.getRecord());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -184,18 +179,18 @@ public class DataHelper {
 	    
 		BasicDBObject doc1 = new BasicDBObject();
 	    doc1.append("_id", String.valueOf(recordId));
-	    doc1.append("userId", user);
-	    doc1.append("engCurve", engCurve);
-	    doc1.append("frmTimes", frmTimes);
-	    doc1.append("PEF", PEF);
-	    doc1.append("FVC", FVC);
-	    doc1.append("FEV1", FEV1);
-	    doc1.append("flowCurve", flowCurve);
-	    doc1.append("volumes", volumes);
+	    doc1.append("userId", record.getUserId());
+	    doc1.append("engCurve", record.getEngCurve());
+	    doc1.append("frmTimes", record.getFrmTimes());
+	    doc1.append("PEF", record.getPEF());
+	    doc1.append("FVC", record.getFVC());
+	    doc1.append("FEV1", record.getFEV1());
+	    doc1.append("flowCurve", record.getFlowCurve());
+	    doc1.append("volumes", record.getVolumes());
 	    doc1.append("time", getToday());
-	    doc1.append("pred_PEF", pred_PEF);
-	    doc1.append("pred_FEV1", pred_FEV1);
-	    doc1.append("pred_FVC", pred_FVC);
+	    doc1.append("pred_PEF", record.getPred_PEF());
+	    doc1.append("pred_FEV1", record.getPred_FEV1());
+	    doc1.append("pred_FVC", record.getPred_FVC());
 	    records.insert(doc1);
 		
 	    mongoClient.close();

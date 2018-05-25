@@ -32,6 +32,8 @@ import org.eclipse.om2m.interworking.service.InterworkingService;
 import org.eclipse.om2m.ipe.sample.constants.Operations;
 import org.eclipse.om2m.ipe.sample.constants.SampleConstants;
 import org.eclipse.om2m.ipe.sample.controller.SampleController;
+import org.eclipse.om2m.ipe.sample.model.Record;
+import org.eclipse.om2m.ipe.sample.model.User;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -101,7 +103,8 @@ public class Router implements InterworkingService{
 
 		switch(op){
 		case CREATE_USER:
-		    obj = DataHelper.getInstance().saveUser(params);
+			User userA = new User(params);		    
+		    obj = DataHelper.getInstance().saveUser(userA);
 		    if (obj != null) {
 		    	id = obj.getString("_id");
 			    name = obj.getString("name");		    
@@ -129,7 +132,7 @@ public class Router implements InterworkingService{
 		    } else {
 		    	response.setContent("{\"status\" : \"false\"}");
 		    }
-		    
+			
 			response.setResponseStatusCode(ResponseStatusCode.OK);
 			break;
 		case FOLLOW:
@@ -166,7 +169,7 @@ public class Router implements InterworkingService{
 		case CREATE_RECORD:
 			JsonElement userJ = params.getAsJsonObject().get("user_id");
 			JsonElement recordJ = params.getAsJsonObject().get("record");
-
+			Record recordA = new Record();		    
 			if (userJ == null || recordJ == null) {
 				response.setContent("{\"status\" : \"false\"\n}");
 		    	response.setResponseStatusCode(ResponseStatusCode.OK);
@@ -175,6 +178,8 @@ public class Router implements InterworkingService{
 			String user = userJ.getAsString();
 			String record = recordJ.getAsString();			
 			record = record.replace("\n", "");
+			recordA.setRecord(record);
+			recordA.setUserId(user);
 
 			//Send request to FFT server and handle response.
 			
@@ -185,6 +190,12 @@ public class Router implements InterworkingService{
 			String pred_PEF = contentJson.getAsJsonObject().get("pred_PEF").getAsString().toString();
 			String pred_FEV1 = contentJson.getAsJsonObject().get("pred_FEV1").getAsString().toString();			
 			String pred_FVC = contentJson.getAsJsonObject().get("pred_FVC").getAsString().toString();			
+			
+			recordA.setEngCurve(engCurve);
+			recordA.setFrmTimes(frmTimes);
+			recordA.setPred_FEV1(pred_FEV1);
+			recordA.setPred_PEF(pred_PEF);
+			recordA.setPred_FVC(pred_FVC);
 			
 			if (contentString == null) {
 		    	response.setContent("{\"status\" : \"false\"\n}");
@@ -201,16 +212,22 @@ public class Router implements InterworkingService{
 			String flowCurve = poliServerResponseJson.getAsJsonObject().get("flow_curve").getAsJsonArray().toString();
 			String volumes = poliServerResponseJson.getAsJsonObject().get("volumes").getAsJsonArray().toString(); 
 			
+			recordA.setPEF(PEF);
+			recordA.setFVC(FVC);
+			recordA.setFEV1(FEV1);
+			recordA.setFlowCurve(flowCurve);
+			recordA.setVolumes(volumes);
+			
 			if (poliServerResponseString == null) {
 		    	response.setContent("{\"status\" : \"false\"}");
 		    	response.setResponseStatusCode(ResponseStatusCode.OK);
 				break;
 			}
 			//Save recored to db
-			long recordId = DataHelper.getInstance().saveRecord(user, record, engCurve, frmTimes, PEF, FVC, FEV1, flowCurve, volumes, pred_PEF, pred_FEV1, pred_FVC);
+			long recordId = DataHelper.getInstance().saveRecord(recordA);
 
 			//Create response.
-			response.setContent(this.customResponse(engCurve, frmTimes, PEF, FVC, FEV1, flowCurve, volumes, pred_PEF, pred_FEV1, pred_FVC));
+			response.setContent(this.customResponse(recordA));
 			response.setResponseStatusCode(ResponseStatusCode.OK);
 			break;
 				
@@ -286,21 +303,19 @@ public class Router implements InterworkingService{
 	}
 	
 	
-	public String customResponse(String engCurve, String frmTimes, String PEF, String FVC, String FEV1, String  flowCurve, String volumes,
-			String pred_PEF, String pred_FEV1, String pred_FVC) {
+	public String customResponse(Record record) {
 		 String content = "{\"status\" : \"success\",\n" + 
-				 	"    \"eng_curve\": " + engCurve + ",\n" + 
-					"    \"frm_times\": " + frmTimes + ",\n" + 
-					"    \"flow_curve\": " + flowCurve + ",\n" + 
-					"    \"volumes\": " + volumes + ",\n" +
-					"    \"PEF\": " + PEF + ",\n" + 
-					"    \"FVC\": " + FVC + ",\n" + 
-					"    \"FEV1\": " + FEV1 + ",\n" + 
-					"    \"pred_PEF\": " + pred_PEF + ",\n" + 
-					"    \"pred_FEV1\": " + pred_FEV1 + ",\n" + 
-					"    \"pred_FVC\": " + pred_FVC + "\n" +
+				 	"    \"eng_curve\": " + record.getEngCurve() + ",\n" + 
+					"    \"frm_times\": " + record.getFrmTimes() + ",\n" + 
+					"    \"flow_curve\": " + record.getFlowCurve() + ",\n" + 
+					"    \"volumes\": " + record.getVolumes() + ",\n" +
+					"    \"PEF\": " + record.getPEF() + ",\n" + 
+					"    \"FVC\": " + record.getFVC() + ",\n" + 
+					"    \"FEV1\": " + record.getFEV1() + ",\n" + 
+					"    \"pred_PEF\": " + record.getPred_PEF() + ",\n" + 
+					"    \"pred_FEV1\": " + record.getPred_FEV1() + ",\n" + 
+					"    \"pred_FVC\": " + record.getPred_FVC() + "\n" +
 					"}";
-		
 		return content;
 	}
 	
