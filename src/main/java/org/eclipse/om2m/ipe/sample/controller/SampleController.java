@@ -15,7 +15,7 @@
  *     Guillaume Garzone : Developer
  *     François Aïssaoui : Developer
  *
- * New contributors :
+ * New contributors : Phucld
  *******************************************************************************/
 package org.eclipse.om2m.ipe.sample.controller;
 

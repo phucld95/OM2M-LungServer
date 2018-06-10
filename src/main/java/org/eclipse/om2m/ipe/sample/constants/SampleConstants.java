@@ -8,7 +8,7 @@ public class SampleConstants {
 	public static final String SERVER_URL ="http://localhost";
 	public static final String POLI_SERVER_URL = SERVER_URL + ":8001";
 	public static final String FFT_SERVER_URL = SERVER_URL + ":8002";
-	public static final String DB_NAME ="YEUHIEN";
+	public static final String DB_NAME ="LUNGSYSTEM";
 	public static final String TB_USER ="User";
 	public static final String TB_RECORD ="Record";
 	public static final String TB_FOLLOW ="Follow";
